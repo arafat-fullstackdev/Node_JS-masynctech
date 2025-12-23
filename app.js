@@ -1,3 +1,4 @@
+const { error } = require('console');
 const http = require('http');
 const os = require('os');
 const process = require('process');
@@ -63,14 +64,87 @@ getTotalMemory();
 const getOsInfo =()=>{
     const platform = os.platform();
     const type=os.type();
+    const relese = os.release();
+    const hostName = os.hostname();
+    const upTime= formatTime(os.uptime());
 
-    console.log({
-        type,
-        platform
-    })
+    // console.log({
+    //     type,
+    //     platform,
+    //     relese,
+    //     hostName,
+    //     upTime
+    // })
 }
 
 getOsInfo();
 //get user info
+
+const getUserInfo =()=>{
+    const user = os.userInfo();
+
+    //console.log(user)
+}
+
+getUserInfo()
 //get network info
+
+const getNetInfo=()=>{
+    const netInfo = os.networkInterfaces();
+
+    //console.log(netInfo)
+}
+getNetInfo()
 //get process
+
+const getProcessInfo=()=>{
+    const pid= process.pid;
+    const title = process.title;
+    const nodeVersion = process.version;
+
+    console.log({pid,title,nodeVersion});
+
+    cwd: process.cwd();
+    memoryUsage: {
+        rss: formatBytes(process.memoryUsage().rss);
+        heapTotal: formatBytes(process.memoryUsage().heapTotal);
+        heapUsed: formatBytes(process.memoryUsage().heapUsed);
+        external: formatBytes(process.memoryUsage().external);
+    }
+
+    env:{
+        NODE_ENV: process.env.NODE_ENV || 'Not set'
+    }
+};
+
+getProcessInfo()
+
+//! create server
+
+const server = http.createServer((req,res)=>{
+     const parseUrl = url.parse(req.url, true);
+     res.setHeader("Content-Type", "application/json");
+     if(parseUrl.pathname ==='/'){
+        res.statusCode = 200;
+        res.end(JSON.stringify({
+            name: "Syctem view API",
+            description: "Acces system ",
+            routes: ['/cpu','/memory','user']
+        }))
+     }else if(parseUrl.pathname === '/cpu'){
+     res.end(JSON.stringify(getCpuInfo(), null, 2));
+     }else{
+        res.statusCode = 404;
+        JSON.stringify({
+          error: "Route not found",
+        })
+     }
+
+
+})
+
+//! start server
+const PORT = 2000;
+server.listen(PORT, ()=>{
+    console.log(`System is running at http://localhost: ${PORT}`);
+})
